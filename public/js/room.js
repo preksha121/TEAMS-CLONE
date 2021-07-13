@@ -2,6 +2,9 @@ const socket = io();
 const myvideo = document.querySelector("#vd1");
 const roomid = params.get("room");
 let username;
+
+// Creatin the required corresponding elements
+
 const chatRoom = document.querySelector('.chat-cont');
 const sendButton = document.querySelector('.chat-send');
 const messageField = document.querySelector('.chat-input');
@@ -16,6 +19,7 @@ const screenShareButt = document.querySelector('.screenshare');
 const whiteboardButt = document.querySelector('.board-icon')
 
 //whiteboard js start
+
 const whiteboardCont = document.querySelector('.whiteboard-cont');
 const canvas = document.querySelector("#whiteboard");
 const ctx = canvas.getContext('2d');
@@ -24,6 +28,8 @@ let boardVisisble = false;
 
 whiteboardCont.style.visibility = 'hidden';
 
+// setting required variables accordingly
+
 let isDrawing = 0;
 let x = 0;
 let y = 0;
@@ -31,6 +37,7 @@ let color = "black";
 let drawsize = 3;
 let colorRemote = "black";
 let drawsizeRemote = 3;
+
 
 function fitToContainer(canvas) {
     canvas.style.width = '100%';
@@ -54,11 +61,13 @@ socket.on('getCanvas', url => {
     console.log('got canvas', url)
 })
 
+// setting the colour
 function setColor(newcolor) {
     color = newcolor;
     drawsize = 3;
 }
 
+// Setting the eraser
 function setEraser() {
     color = "white";
     drawsize = 10;
@@ -70,8 +79,9 @@ function reportWindowSize() {
 }
 
 window.onresize = reportWindowSize;
-//
 
+
+// Setting clear Board feature
 function clearBoard() {
     if (window.confirm('Are you sure you want to clear board? This cannot be undone')) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -80,10 +90,12 @@ function clearBoard() {
     } else return;
 }
 
+// socket for clear board
 socket.on('clearBoard', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 })
 
+// draw feature on board (host)
 function draw(newx, newy, oldx, oldy) {
     ctx.strokeStyle = color;
     ctx.lineWidth = drawsize;
@@ -97,6 +109,7 @@ function draw(newx, newy, oldx, oldy) {
 
 }
 
+// draw feature on board (remote user)
 function drawRemote(newx, newy, oldx, oldy) {
     ctx.strokeStyle = colorRemote;
     ctx.lineWidth = drawsizeRemote;
@@ -151,6 +164,7 @@ mymuteicon.style.visibility = 'hidden';
 let myvideooff = document.querySelector("#myvideooff");
 myvideooff.style.visibility = 'hidden';
 
+// setting the stun server configurations
 const configuration = { iceServers: [{ urls: "stun:stun.stunprotocol.org" }] }
 
 const mediaConstraints = { video: true, audio: true };
@@ -210,6 +224,7 @@ nameField.addEventListener("keyup", function(event) {
     }
 });
 
+// socket for total number of users count show
 socket.on('user count', count => {
     if (count > 1) {
         videoContainer.className = 'video-cont';
@@ -242,7 +257,8 @@ function reportError(e) {
     return;
 }
 
-
+// function to begin the real time communication 
+//for all the current users in the room
 function startCall() {
 
     navigator.mediaDevices.getUserMedia(mediaConstraints)
@@ -456,7 +472,7 @@ socket.on('new icecandidate', handleNewIceCandidate);
 
 socket.on('video-answer', handleVideoAnswer);
 
-
+//socket connection for the remote user and providing access to the features
 socket.on('join room', async(conc, cnames, micinfo, videoinfo) => {
     socket.emit('getCanvas');
     if (cnames)
@@ -483,6 +499,8 @@ socket.on('join room', async(conc, cnames, micinfo, videoinfo) => {
 
             connections[sid].ontrack = function(event) {
 
+                // adding all remote candidates to the room 
+                // and giving access to the features
                 if (!document.getElementById(sid)) {
                     console.log('track event fired')
                     let vidCont = document.createElement('div');
@@ -585,19 +603,23 @@ messageField.addEventListener("keyup", function(event) {
     }
 });
 
+
+// for transfer of message in chat
 socket.on('message', (msg, sendername, time) => {
     chatRoom.scrollTop = chatRoom.scrollHeight;
     chatRoom.innerHTML += `<div class="message">
-    <div class="info">
-        <div class="username">${sendername}</div>
-        <div class="time">${time}</div>
-    </div>
-    <div class="content">
-        ${msg}
-    </div>
+ <div class="info">
+ <div class="username">${sendername}</div>
+ <div class="time">${time}</div>
+ </div>
+ <div class="content">
+ ${msg}
+ </div>
 </div>`
 });
 
+
+// for developing all the features of video button event
 videoButt.addEventListener('click', () => {
 
     if (videoAllowed) {
@@ -641,6 +663,7 @@ videoButt.addEventListener('click', () => {
 })
 
 
+// developing all the required features of audio button event
 audioButt.addEventListener('click', () => {
 
     if (audioAllowed) {
@@ -680,6 +703,7 @@ audioButt.addEventListener('click', () => {
     }
 })
 
+// for showing realtime situation of video and message
 socket.on('action', (msg, sid) => {
     if (msg == 'mute') {
         console.log(sid + ' muted themself');
@@ -700,6 +724,7 @@ socket.on('action', (msg, sid) => {
     }
 })
 
+// whiteboard features
 whiteboardButt.addEventListener('click', () => {
     if (boardVisisble) {
         whiteboardCont.style.visibility = 'hidden';
@@ -710,6 +735,7 @@ whiteboardButt.addEventListener('click', () => {
     }
 })
 
+// for leaving the call
 cutCall.addEventListener('click', () => {
     location.href = '/';
 })

@@ -1,3 +1,4 @@
+// for creating the required corresponding elements
 const createButton = document.querySelector("#createroom");
 const videoCont = document.querySelector('.video-self');
 const codeCont = document.querySelector('#roomcode');
@@ -8,12 +9,19 @@ const cam = document.querySelector('#webcam');
 let micAllowed = 1;
 let camAllowed = 1;
 
+// setting the audio and video
 let mediaConstraints = { video: true, audio: true };
 
+// for permitting use of audio and video input to produces a MediaStream
 navigator.mediaDevices.getUserMedia(mediaConstraints)
     .then(localstream => {
         videoCont.srcObject = localstream;
     })
+
+// uuidv4 generates a unique identifier string. 
+// The id is a generated and formatted as required by RFC 4122 section 4.4, 
+// producing a Version 4 UUID. 
+// The result is a UUID generated only from pseudo-random numbers.
 
 function uuidv4() {
     return 'xxyxyxxyx'.replace(/[xy]/g, function(c) {
@@ -25,6 +33,7 @@ function uuidv4() {
 
 const createroomtext = 'Creating Room...';
 
+// feature of creating room for the host with unique id
 createButton.addEventListener('click', (e) => {
     e.preventDefault();
     createButton.disabled = true;
@@ -61,6 +70,7 @@ codeCont.addEventListener('change', (e) => {
     }
 })
 
+// video mute and unmute feature
 cam.addEventListener('click', () => {
     if (camAllowed) {
         mediaConstraints = { video: false, audio: micAllowed ? true : false };
@@ -85,6 +95,7 @@ cam.addEventListener('click', () => {
     }
 })
 
+// audio mute and unmute feature
 mic.addEventListener('click', () => {
     if (micAllowed) {
         mediaConstraints = { video: camAllowed ? true : false, audio: false };

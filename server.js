@@ -1,15 +1,20 @@
-const path = require('path');
-const express = require('express')
-const http = require('http')
-const moment = require('moment');
+const path = require('path'); // The path module provides utilities for working with file and directory paths
+const express = require('express'); // for importing express module 
+const http = require('http'); // to transfer data over the Hyper Text Transfer Protocol (HTTP)
+const moment = require('moment'); // for managing dates
 const socketio = require('socket.io');
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // using port 3000
 
+// to create a new express application 
 const app = express();
+
+// to turns the system into an HTTP server
 const server = http.createServer(app);
 
+// for realtime web communication
 const io = socketio(server);
 
+// for getting path and using a middleware that serves all files in public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 let rooms = {};
@@ -19,8 +24,11 @@ let micSocket = {};
 let videoSocket = {};
 let roomBoard = {};
 
+// for socket connection
 io.on('connect', socket => {
 
+    // For your convenience, each socket automatically joins a room identified by its own id.
+    // for broadcasting and emmitting
     socket.on("join room", (roomid, username) => {
 
         socket.join(roomid);
@@ -92,6 +100,9 @@ io.on('connect', socket => {
         roomBoard[socketroom[socket.id]] = url;
     })
 
+    // Upon disconnection, sockets leave all the channels they were part of automatically, 
+    // and no special teardown is needed on our part
+
     socket.on('disconnect', () => {
         if (!socketroom[socket.id]) return;
         socket.to(socketroom[socket.id]).emit('message', `${socketname[socket.id]} left the chat.`, `Bot`, moment().format(
@@ -104,10 +115,8 @@ io.on('connect', socket => {
         delete socketroom[socket.id];
         console.log('--------------------');
         console.log(rooms[socketroom[socket.id]]);
-
-        //toDo: push socket.id out of rooms
     });
 })
 
-
+//Creating a server that listens on mentioned port
 server.listen(PORT, () => console.log(`Server is up and running on port ${PORT}`));
